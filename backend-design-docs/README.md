@@ -9,6 +9,8 @@
 | [index](./index.md)                       | Process bootstrap and graceful HTTP shutdown.                  |
 | [logger](./logger.md)                     | Structured application logging.                                |
 | [migration runner](./migration-runner.md) | Sequential discovery and atomic application of SQL migrations. |
+| [ordering](./_ordering.md)                | Fractional-key rules shared by client and server.              |
+| [ordering service](./ordering.md)         | Atomic card movement and column-key rebalancing.               |
 | [request-context](./request-context.md)   | Request IDs and request completion logs.                       |
 | [seed](./seed.md)                         | Idempotent creation of a local demonstration board.            |
 
