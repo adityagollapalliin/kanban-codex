@@ -12,9 +12,10 @@ import { ColumnHeader } from './ColumnHeader.js';
 interface Props {
   readonly column: HydratedColumn;
   readonly labelsById: ReadonlyMap<string, Label>;
+  readonly onOpenCard: (cardId: string, origin: HTMLElement) => void;
 }
 
-export function Column({ column, labelsById }: Props) {
+export function Column({ column, labelsById, onOpenCard }: Props) {
   const headingId = `column-${column.id}`;
   const sortable = useSortable({
     id: `column:${column.id}`,
@@ -61,7 +62,13 @@ export function Column({ column, labelsById }: Props) {
             <ul className="space-y-2.5">
               {column.cards.map((card) => (
                 <li key={card.id}>
-                  <Card card={card} labelsById={labelsById} />
+                  <Card
+                    card={card}
+                    labelsById={labelsById}
+                    onOpen={(origin) => {
+                      onOpenCard(card.id, origin);
+                    }}
+                  />
                 </li>
               ))}
             </ul>

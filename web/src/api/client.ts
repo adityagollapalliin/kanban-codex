@@ -18,7 +18,7 @@ export async function getJson<T>(path: string, schema: ZodType<T>): Promise<T> {
 
 export async function sendJson<T>(
   path: string,
-  method: 'PATCH' | 'POST',
+  method: 'PATCH' | 'POST' | 'DELETE',
   body: unknown,
   schema: ZodType<T>,
 ): Promise<T> {

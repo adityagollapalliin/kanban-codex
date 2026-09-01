@@ -7,9 +7,10 @@ import { LabelChip } from '../../components/LabelChip.js';
 interface Props {
   readonly card: CardData;
   readonly labelsById: ReadonlyMap<string, Label>;
+  readonly onOpen: (origin: HTMLElement) => void;
 }
 
-export function Card({ card, labelsById }: Props) {
+export function Card({ card, labelsById, onOpen }: Props) {
   const {
     attributes,
     listeners,
@@ -38,6 +39,12 @@ export function Card({ card, labelsById }: Props) {
           ? `translate3d(${String(transform.x)}px, ${String(transform.y)}px, 0) scaleX(${String(transform.scaleX)}) scaleY(${String(transform.scaleY)})`
           : undefined,
         transition,
+      }}
+      onClick={(event) => {
+        onOpen(event.currentTarget);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter') onOpen(event.currentTarget);
       }}
     >
       <h3 className="wrap-break-word text-sm leading-5 font-semibold text-slate-900 dark:text-slate-100">

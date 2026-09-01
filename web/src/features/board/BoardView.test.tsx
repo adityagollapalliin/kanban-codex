@@ -127,6 +127,19 @@ describe('read-only board', () => {
     rerender(<DueDatePill dueDate="2026-01-01T12:00:00.000Z" now={now} />);
     expect(screen.getByText(/Due/).className).toContain('amber');
   });
+
+  it('opens the detail drawer and closes it with Escape', async () => {
+    stubResponse(hydrate);
+    renderApp();
+    const card = await screen.findByLabelText('Card: Ship the board');
+    fireEvent.click(card);
+    expect(await screen.findByTestId('card-drawer')).toBeTruthy();
+    expect(screen.getByLabelText<HTMLInputElement>('Card title').value).toBe(
+      'Ship the board',
+    );
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByTestId('card-drawer')).toBeNull();
+  });
 });
 
 function renderApp(): void {

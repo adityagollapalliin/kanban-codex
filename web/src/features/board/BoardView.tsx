@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { BoardHydrate } from '@kanban/shared';
 import {
   DndContext,
@@ -23,13 +23,19 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useBoardQuery } from '../../api/board.js';
 import { boardQueryKey } from '../../api/board.js';
 import {
+  optimisticCardPatch,
+  useUpdateCardMutation,
+} from '../../api/card-mutations.js';
+import {
   useMoveCardMutation,
   useMoveColumnMutation,
 } from '../../api/mutations.js';
 import { DragErrorToast } from '../../components/DragErrorToast.js';
+import { UndoToast } from '../../components/UndoToast.js';
 import { BoardSkeleton } from '../../components/BoardSkeleton.js';
 import { Column } from './Column.js';
 import { DragOverlayCard } from './DragOverlayCard.js';
+import { CardDrawer } from './CardDrawer.js';
 import {
   cardMoveRequest,
   columnMoveRequest,
@@ -44,24 +50,84 @@ interface ActiveDrag {
   readonly kind: 'card' | 'column';
   readonly title: string;
 }
+interface SelectedCard {
+  readonly id: string;
+  readonly origin: HTMLElement;
+}
+interface UndoState {
+  readonly cardId: string;
+  readonly cardTitle: string;
+  readonly archivedBoard: BoardHydrate;
+  readonly restoreBoard: BoardHydrate;
+}
 
 export function BoardView() {
   const query = useBoardQuery();
   const queryClient = useQueryClient();
   const [activeDrag, setActiveDrag] = useState<ActiveDrag | null>(null);
   const [moveError, setMoveError] = useState<string | null>(null);
+  const [selectedCard, setSelectedCard] = useState<SelectedCard | null>(null);
+  const [undoState, setUndoState] = useState<UndoState | null>(null);
   const initialBoard = useRef<BoardHydrate | null>(null);
   const moveCard = useMoveCardMutation({ onError: setMoveError });
   const moveColumn = useMoveColumnMutation({ onError: setMoveError });
+  const updateCard = useUpdateCardMutation(setMoveError);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
   );
-  if (!query.data) return <BoardSkeleton />;
-  const { board, columns, labels } = query.data;
+  const board = query.data?.board;
+  const columns = query.data?.columns ?? [];
+  const labels = query.data?.labels ?? [];
   const labelsById = new Map(labels.map((label) => [label.id, label]));
+  const closeDrawer = useCallback(() => {
+    setSelectedCard((current) => {
+      current?.origin.focus();
+      return null;
+    });
+  }, []);
+  const openCard = (id: string, origin: HTMLElement) => {
+    setSelectedCard({ id, origin });
+  };
+  const archiveCard = () => {
+    if (!selectedCard) return;
+    const before = queryClient.getQueryData<BoardHydrate>(boardQueryKey);
+    const card = before?.columns
+      .flatMap((item) => item.cards)
+      .find((item) => item.id === selectedCard.id);
+    if (!before || !card) return;
+    const nextBoard = optimisticCardPatch(before, card.id, { archived: true });
+    updateCard.mutate({
+      cardId: card.id,
+      patch: { archived: true },
+      nextBoard,
+      rollbackBoard: before,
+    });
+    setUndoState({
+      cardId: card.id,
+      cardTitle: card.title,
+      archivedBoard: nextBoard,
+      restoreBoard: before,
+    });
+    closeDrawer();
+  };
+  const undoArchive = () => {
+    if (!undoState) return;
+    const current =
+      queryClient.getQueryData<BoardHydrate>(boardQueryKey) ??
+      undoState.archivedBoard;
+    updateCard.mutate({
+      cardId: undoState.cardId,
+      patch: { archived: false },
+      nextBoard: undoState.restoreBoard,
+      rollbackBoard: current,
+    });
+    setUndoState(null);
+  };
+
+  if (!query.data || !board) return <BoardSkeleton />;
 
   function handleDragStart(event: DragStartEvent) {
     const kind = event.active.data.current?.type as
@@ -204,6 +270,7 @@ export function BoardView() {
                   column={column}
                   key={column.id}
                   labelsById={labelsById}
+                  onOpenCard={openCard}
                 />
               ))}
             </div>
@@ -224,6 +291,30 @@ export function BoardView() {
           setMoveError(null);
         }}
       />
+      {selectedCard &&
+        (() => {
+          const card = columns
+            .flatMap((column) => column.cards)
+            .find((item) => item.id === selectedCard.id);
+          return card ? (
+            <CardDrawer
+              card={card}
+              labels={labels}
+              onArchive={archiveCard}
+              onClose={closeDrawer}
+              onError={setMoveError}
+            />
+          ) : null;
+        })()}
+      {undoState && (
+        <UndoToast
+          cardTitle={undoState.cardTitle}
+          onExpire={() => {
+            setUndoState(null);
+          }}
+          onUndo={undoArchive}
+        />
+      )}
     </main>
   );
 }
