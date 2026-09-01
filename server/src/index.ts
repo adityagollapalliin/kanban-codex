@@ -1,4 +1,5 @@
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 
 import { createApp } from './app.js';
 import { ConfigError, parseConfig } from './config.js';
@@ -36,6 +37,7 @@ try {
       : {}),
     ...(config.sessionSecret ? { sessionSecret: config.sessionSecret } : {}),
     production: config.nodeEnv === 'production',
+    staticRoot: fileURLToPath(new URL('../../../web/dist', import.meta.url)),
   });
   const server = app.listen(config.port, () => {
     logger.info({ port: config.port, version }, 'server listening');

@@ -20,6 +20,7 @@ interface AppOptions {
   readonly authPasswordHash?: string;
   readonly sessionSecret?: string;
   readonly production?: boolean;
+  readonly staticRoot?: string;
 }
 
 export function createApp({
@@ -29,6 +30,7 @@ export function createApp({
   authPasswordHash,
   sessionSecret,
   production = false,
+  staticRoot,
 }: AppOptions): Express {
   const app = express();
 
@@ -54,6 +56,23 @@ export function createApp({
   app.use('/api/checklist-items', createChecklistItemsRouter(database));
   app.use('/api', createExportImportRouter(database));
   app.use('/api', notFoundHandler);
+  if (production && staticRoot) {
+    app.use(
+      express.static(staticRoot, {
+        setHeaders: (response, filePath) => {
+          if (/[/\\]assets[/\\]/.test(filePath)) {
+            response.setHeader(
+              'Cache-Control',
+              'public, max-age=31536000, immutable',
+            );
+          }
+        },
+      }),
+    );
+    app.get('/{*splat}', (_request, response) => {
+      response.sendFile('index.html', { root: staticRoot });
+    });
+  }
   app.use(errorHandler(logger));
 
   return app;

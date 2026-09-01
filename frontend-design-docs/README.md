@@ -24,6 +24,7 @@
 | [state management](./_state-management.md)          | Query keys, cache shape, and error/reset policy.       |
 | [UndoToast](./undo-toast.md)                        | Eight-second archive undo action.                      |
 | [ShortcutsOverlay](./shortcuts-overlay.md)          | Keyboard shortcut reference overlay.                   |
+| [smoke test](./smoke-test.md)                       | Playwright production hydration smoke test.            |
 | [keyboard map](./_keyboard-map.md)                  | Global shortcut scope and conflict rules.              |
 
 Only implemented or currently designed frontend units are indexed. Future phases may add additional units.

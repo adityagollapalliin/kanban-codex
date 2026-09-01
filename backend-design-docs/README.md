@@ -28,5 +28,7 @@
 | [ordering service](./ordering.md)                       | Atomic card movement and column-key rebalancing.               |
 | [request-context](./request-context.md)                 | Request IDs and request completion logs.                       |
 | [seed](./seed.md)                                       | Idempotent creation of a local demonstration board.            |
+| [backup](./backup.md)                                   | Online SQLite backup CLI and failure handling.                 |
+| [production serving](./production-serving.md)           | Static web serving and SPA fallback in production.             |
 
 Only modules implemented or being designed in the current phase are indexed. Future phases may add additional modules.
