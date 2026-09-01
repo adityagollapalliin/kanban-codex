@@ -2,6 +2,8 @@ import process from 'node:process';
 
 import { createApp } from './app.js';
 import { ConfigError, parseConfig } from './config.js';
+import { openDatabase } from './db/client.js';
+import { migrateDatabase } from './db/migrate.js';
 import { createLogger } from './logger.js';
 
 try {
@@ -15,6 +17,15 @@ try {
 try {
   const config = parseConfig(process.env);
   const logger = createLogger(config.nodeEnv);
+  const database = openDatabase(config.databasePath);
+  let migrations;
+  try {
+    migrations = migrateDatabase(database);
+  } catch (error: unknown) {
+    database.close();
+    throw error;
+  }
+  logger.info({ applied: migrations.applied }, 'database migrations completed');
   const version = process.env.npm_package_version ?? '0.1.0';
   const app = createApp({ logger, version });
   const server = app.listen(config.port, () => {
@@ -41,6 +52,7 @@ try {
 
     server.close((error) => {
       clearTimeout(timeout);
+      if (database.open) database.close();
       if (error) {
         logger.error({ error }, 'HTTP server failed to close cleanly');
         process.exitCode = 1;
@@ -49,6 +61,12 @@ try {
       }
     });
   };
+
+  server.once('error', (error) => {
+    logger.error({ error }, 'HTTP server failed');
+    process.exitCode = 1;
+    if (database.open) database.close();
+  });
 
   process.once('SIGTERM', shutdown);
   process.once('SIGINT', shutdown);

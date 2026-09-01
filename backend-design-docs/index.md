@@ -5,7 +5,7 @@
 
 ## Purpose
 
-Load configuration, create the app, listen for HTTP traffic, warn when authentication is disabled, and coordinate graceful shutdown.
+Load configuration, migrate and own the database connection, create the app, listen for HTTP traffic, warn when authentication is disabled, and coordinate graceful shutdown.
 
 ## Public interface
 
@@ -13,7 +13,7 @@ Executable module; it exports no application API.
 
 ## Data access
 
-None in Phase 1. Database ownership is added in the data-layer phase.
+Opens the configured SQLite database and applies pending migrations before listening. No request handler receives the connection until the API phase.
 
 ## Transaction boundaries
 
@@ -31,12 +31,13 @@ Delegates environment validation to `parseConfig` before opening the listener.
 
 ## Invariants
 
-Only one shutdown sequence runs. SIGTERM and SIGINT stop new connections before process exit.
+Only one shutdown sequence runs. SIGTERM and SIGINT stop new connections, then close SQLite before process exit.
 
 ## Failure modes
 
-Listen errors fail startup. A bounded shutdown timer prevents the process hanging indefinitely.
+Database or migration errors fail startup before a port is opened. Listen errors close the database. A bounded shutdown timer prevents the process hanging indefinitely.
 
 ## Test cases
 
-- Covered indirectly by application and configuration tests; signal integration is deferred until the database lifecycle exists.
+- Invalid or failed database startup never opens the HTTP listener.
+- Signal integration is covered operationally by the development-command smoke check.
