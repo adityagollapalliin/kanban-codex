@@ -1,0 +1,23 @@
+{
+  "name": "@kanban/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/src/index.js",
+    "test": "npm run build -w @kanban/shared && npm run build && node --test dist/test/**/*.test.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "migrate": "node -e \"throw new Error('Migrations are introduced in Phase 2')\"",
+    "seed": "node -e \"throw new Error('Seeding is introduced in Phase 2')\""
+  },
+  "dependencies": {
+    "@kanban/shared": "0.1.0",
+    "express": "^5.2.1",
+    "pino": "^10.3.1",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "supertest": "^7.2.2"
+  }
+}
