@@ -10,8 +10,11 @@
 | [Column](./column.md)                           | Scrollable card lane and empty state.                  |
 | [ColumnHeader](./column-header.md)              | Column title, count, and WIP status.                   |
 | [DueDatePill](./due-date-pill.md)               | Accessible due-date urgency indicator.                 |
+| [DragErrorToast](./drag-error-toast.md)         | Accessible rollback notification for failed moves.     |
+| [DragOverlayCard](./drag-overlay-card.md)       | Decorative preview for an active draggable item.       |
 | [LabelChip](./label-chip.md)                    | Compact color-coded label.                             |
+| [drag and drop](./_drag-and-drop.md)            | Sensors, collision, announcements, and persistence.    |
 | [design system](./_design-system.md)            | Visual tokens, responsive layout, and dark-mode rules. |
 | [state management](./_state-management.md)      | Query keys, cache shape, and error/reset policy.       |
 
-Only implemented or currently designed frontend units are indexed. Mutation and drag-and-drop documents arrive in their implementation phases.
+Only implemented or currently designed frontend units are indexed. Card editing and filtering documents arrive in their implementation phases.

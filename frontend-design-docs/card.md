@@ -16,7 +16,7 @@ Render a read-only summary of title, labels, due date, and checklist progress; i
 
 ## State ownership
 
-None.
+No local React state; dnd-kit supplies transient sortable state.
 
 ## Data dependencies
 
@@ -24,15 +24,15 @@ None; receives query data and invalidates nothing.
 
 ## Interactions
 
-No click action in Phase 5; optimistic/rollback paths are not applicable.
+The article is a sortable item. Pointer or Space initiates movement; BoardView owns optimistic persistence and rollback.
 
 ## Keyboard & accessibility
 
-List item/article semantics; metadata has text equivalents and sensible reading order.
+The article is focusable and labelled as draggable; dnd-kit supplies keyboard bindings. Metadata retains text equivalents and reading order.
 
 ## Visual states
 
-Default and metadata variants apply. Hover hints future interactivity; loading/error/disabled/dragging/over-WIP are not applicable.
+Default, focus, hover, and dragging states apply. Loading/error/disabled/over-WIP are not applicable.
 
 ## Composition
 
@@ -44,4 +44,4 @@ Long titles, unknown labels, no metadata, zero checklist items, and large checkl
 
 ## Open questions
 
-Drawer activation and draggable affordances arrive later.
+Drawer activation arrives in Phase 7.

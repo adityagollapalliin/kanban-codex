@@ -13,8 +13,32 @@ export class ApiClientError extends Error {
 }
 
 export async function getJson<T>(path: string, schema: ZodType<T>): Promise<T> {
+  return requestJson(path, schema);
+}
+
+export async function sendJson<T>(
+  path: string,
+  method: 'PATCH' | 'POST',
+  body: unknown,
+  schema: ZodType<T>,
+): Promise<T> {
+  return requestJson(path, schema, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+}
+
+async function requestJson<T>(
+  path: string,
+  schema: ZodType<T>,
+  init?: RequestInit,
+): Promise<T> {
+  const headers = new Headers(init?.headers);
+  headers.set('Accept', 'application/json');
   const response = await fetch(path, {
-    headers: { Accept: 'application/json' },
+    ...init,
+    headers,
   });
   const body: unknown = await response.json();
   if (!response.ok) {

@@ -16,7 +16,7 @@ Render one fixed-width lane with an independently scrolling active-card list and
 
 ## State ownership
 
-None.
+No local React state; dnd-kit supplies transient sortable and drop-target state.
 
 ## Data dependencies
 
@@ -24,15 +24,15 @@ Receives hydrate data; calls no hooks and invalidates nothing.
 
 ## Interactions
 
-Read-only scrolling only; optimistic/rollback paths are not applicable.
+The column and its empty body are sortable/drop targets. Persistence and rollback are coordinated by BoardView.
 
 ## Keyboard & accessibility
 
-Section is labelled by header; card list uses list semantics; scroll container remains keyboard-scrollable.
+Section is labelled by its sortable header; card list uses list semantics and remains keyboard-scrollable.
 
 ## Visual states
 
-Default, empty, at-limit, and over-limit via header. Loading/error/disabled/dragging are not applicable.
+Default, empty, card-over, column-dragging, at-limit, and over-limit states apply. Loading/error/disabled are not applicable.
 
 ## Composition
 
@@ -44,4 +44,4 @@ Zero and hundreds of cards, long names, missing imported label references, and n
 
 ## Open questions
 
-Drop-target styling is finalized in Phase 6.
+None for Phase 6.

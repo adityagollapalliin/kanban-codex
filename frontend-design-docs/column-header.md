@@ -9,12 +9,13 @@ Present the column name and count/WIP status; it does not edit the column.
 
 ## Props
 
-| Prop     | Type             | Required | Description                 |
-| -------- | ---------------- | -------- | --------------------------- |
-| id       | `string`         | Yes      | Heading association.        |
-| name     | `string`         | Yes      | Display title.              |
-| count    | `number`         | Yes      | Active card count.          |
-| wipLimit | `number \| null` | Yes      | Optional warning threshold. |
+| Prop            | Type                                      | Required | Description                                 |
+| --------------- | ----------------------------------------- | -------- | ------------------------------------------- |
+| id              | `string`                                  | Yes      | Heading association.                        |
+| name            | `string`                                  | Yes      | Display title.                              |
+| count           | `number`                                  | Yes      | Active card count.                          |
+| wipLimit        | `number \| null`                          | Yes      | Optional warning threshold.                 |
+| dragHandleProps | `ButtonHTMLAttributes<HTMLButtonElement>` | Yes      | Keyboard-accessible column handle bindings. |
 
 ## State ownership
 
@@ -22,7 +23,7 @@ None; WIP tone is derived.
 
 ## Data dependencies
 
-None.
+The labelled drag handle starts pointer or keyboard column movement.
 
 ## Interactions
 
@@ -30,11 +31,11 @@ None.
 
 ## Keyboard & accessibility
 
-Semantic heading; count text includes WIP meaning without relying on color.
+Semantic heading; count text includes WIP meaning without relying on color. The handle is a labelled button with visible focus.
 
 ## Visual states
 
-Neutral below limit, amber at limit, red over limit. Other states are not applicable.
+Neutral below limit, amber at limit, red over limit, and active-drag handle states apply.
 
 ## Composition
 

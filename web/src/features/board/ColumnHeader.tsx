@@ -1,11 +1,20 @@
+import type { ButtonHTMLAttributes } from 'react';
+
 interface Props {
   readonly count: number;
   readonly id: string;
   readonly name: string;
   readonly wipLimit: number | null;
+  readonly dragHandleProps: ButtonHTMLAttributes<HTMLButtonElement>;
 }
 
-export function ColumnHeader({ count, id, name, wipLimit }: Props) {
+export function ColumnHeader({
+  count,
+  dragHandleProps,
+  id,
+  name,
+  wipLimit,
+}: Props) {
   const state =
     wipLimit === null
       ? 'normal'
@@ -32,13 +41,23 @@ export function ColumnHeader({ count, id, name, wipLimit }: Props) {
         : '';
   return (
     <header className="flex items-center justify-between gap-3 px-1 pb-3">
-      <h2
-        className="truncate text-sm font-bold text-slate-900 dark:text-slate-100"
-        id={id}
-        title={name}
-      >
-        {name}
-      </h2>
+      <div className="flex min-w-0 items-center gap-1">
+        <button
+          {...dragHandleProps}
+          aria-label={`Move column ${name}`}
+          className="touch-none rounded-md px-1 py-0.5 text-slate-400 hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+          type="button"
+        >
+          ⠿
+        </button>
+        <h2
+          className="truncate text-sm font-bold text-slate-900 dark:text-slate-100"
+          id={id}
+          title={name}
+        >
+          {name}
+        </h2>
+      </div>
       <span
         aria-label={`${countText}${status}`}
         className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold ${tone}`}
