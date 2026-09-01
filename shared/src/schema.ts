@@ -19,6 +19,8 @@ export const errorCodeSchema = z.enum([
   'IMPORT_INVALID',
   'NOT_FOUND',
   'INTERNAL_ERROR',
+  'AUTH_REQUIRED',
+  'AUTH_INVALID',
 ]);
 export type ErrorCode = z.infer<typeof errorCodeSchema>;
 export const errorResponseSchema = z.object({
@@ -33,6 +35,10 @@ export const healthResponseSchema = z.object({
   ok: z.literal(true),
   version: z.string().min(1),
 });
+export const loginRequestSchema = z
+  .object({ password: z.string().min(1).max(500) })
+  .strict();
+export const loginResponseSchema = z.object({ authenticated: z.literal(true) });
 export type HealthResponse = z.infer<typeof healthResponseSchema>;
 
 export const boardSchema = z.object({

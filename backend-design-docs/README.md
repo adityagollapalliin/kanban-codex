@@ -3,6 +3,8 @@
 | Document                                                | Purpose                                                        |
 | ------------------------------------------------------- | -------------------------------------------------------------- |
 | [app](./app.md)                                         | Express application composition and health endpoint.           |
+| [auth service](./auth-service.md)                       | Signed sessions and authentication middleware.                 |
+| [auth routes](./auth-routes.md)                         | Rate-limited password login endpoint.                          |
 | [API contract](./_api-contract.md)                      | Shared request, response, entity, and dump schemas.            |
 | [board service](./board-service.md)                     | Full board hydration.                                          |
 | [board routes](./board-routes.md)                       | Board hydrate HTTP adapter.                                    |
@@ -27,4 +29,4 @@
 | [request-context](./request-context.md)                 | Request IDs and request completion logs.                       |
 | [seed](./seed.md)                                       | Idempotent creation of a local demonstration board.            |
 
-Only modules implemented or being designed in the current phase are indexed. Auth, service, and route documents are added before their corresponding implementation phases.
+Only modules implemented or being designed in the current phase are indexed. Future phases may add additional modules.

@@ -13,9 +13,15 @@ interface Props {
   readonly column: HydratedColumn;
   readonly labelsById: ReadonlyMap<string, Label>;
   readonly onOpenCard: (cardId: string, origin: HTMLElement) => void;
+  readonly onFocusColumn: (columnId: string) => void;
 }
 
-export function Column({ column, labelsById, onOpenCard }: Props) {
+export function Column({
+  column,
+  labelsById,
+  onFocusColumn,
+  onOpenCard,
+}: Props) {
   const headingId = `column-${column.id}`;
   const sortable = useSortable({
     id: `column:${column.id}`,
@@ -30,6 +36,9 @@ export function Column({ column, labelsById, onOpenCard }: Props) {
       aria-labelledby={headingId}
       className={`flex h-full w-80 shrink-0 flex-col rounded-2xl border bg-slate-100/90 p-3 dark:bg-slate-900/80 ${drop.isOver ? 'border-blue-500 ring-2 ring-blue-400/30' : 'border-slate-200 dark:border-slate-800'} ${sortable.isDragging ? 'opacity-30' : ''}`}
       ref={sortable.setNodeRef}
+      onFocusCapture={() => {
+        onFocusColumn(column.id);
+      }}
       style={{
         transform: sortable.transform
           ? `translate3d(${String(sortable.transform.x)}px, ${String(sortable.transform.y)}px, 0) scaleX(${String(sortable.transform.scaleX)}) scaleY(${String(sortable.transform.scaleY)})`

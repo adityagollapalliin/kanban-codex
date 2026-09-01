@@ -13,7 +13,10 @@ void describe('migrateDatabase', () => {
     const database = openDatabase(join(directory, 'kanban.sqlite'));
 
     try {
-      assert.deepEqual(migrateDatabase(database).applied, ['001_init.sql']);
+      assert.deepEqual(migrateDatabase(database).applied, [
+        '001_init.sql',
+        '002_sessions.sql',
+      ]);
       assert.deepEqual(migrateDatabase(database).applied, []);
 
       const objects = database
@@ -29,6 +32,7 @@ void describe('migrateDatabase', () => {
         'labels',
         'card_labels',
         'checklist_items',
+        'sessions',
         'idx_columns_board',
         'idx_cards_column',
         'idx_cards_archived',

@@ -80,7 +80,7 @@ describe('read-only board', () => {
       await screen.findByRole('heading', { name: 'My Board' }),
     ).toBeTruthy();
     expect(screen.getByText('Ship the board')).toBeTruthy();
-    expect(screen.getByText('Important')).toBeTruthy();
+    expect(screen.getAllByText('Important').length).toBeGreaterThan(0);
     expect(screen.getByText('1/2')).toBeTruthy();
     expect(screen.getByText(/No cards yet/)).toBeTruthy();
     expect(screen.getByLabelText('1 / 0, over WIP limit')).toBeTruthy();
@@ -106,6 +106,12 @@ describe('read-only board', () => {
           500,
         ),
       )
+      .mockResolvedValueOnce(
+        jsonResponse(
+          { error: { code: 'INTERNAL_ERROR', message: 'Failed' } },
+          500,
+        ),
+      )
       .mockResolvedValueOnce(jsonResponse(hydrate));
     vi.stubGlobal('fetch', fetchMock);
     renderApp();
@@ -115,7 +121,7 @@ describe('read-only board', () => {
     expect(
       await screen.findByRole('heading', { name: 'My Board' }),
     ).toBeTruthy();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
   it('communicates overdue and near-due states with text and color classes', () => {

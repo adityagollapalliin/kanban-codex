@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { BoardHydrate } from '@kanban/shared';
 import {
   DndContext,
@@ -24,6 +24,7 @@ import { useBoardQuery } from '../../api/board.js';
 import { boardQueryKey } from '../../api/board.js';
 import {
   optimisticCardPatch,
+  useCreateCardMutation,
   useUpdateCardMutation,
 } from '../../api/card-mutations.js';
 import {
@@ -36,6 +37,9 @@ import { BoardSkeleton } from '../../components/BoardSkeleton.js';
 import { Column } from './Column.js';
 import { DragOverlayCard } from './DragOverlayCard.js';
 import { CardDrawer } from './CardDrawer.js';
+import { FilterBar, type BoardFilter } from './FilterBar.js';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts.js';
+import { ShortcutsOverlay } from '../../components/ShortcutsOverlay.js';
 import {
   cardMoveRequest,
   columnMoveRequest,
@@ -68,10 +72,19 @@ export function BoardView() {
   const [moveError, setMoveError] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<SelectedCard | null>(null);
   const [undoState, setUndoState] = useState<UndoState | null>(null);
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const [filter, setFilter] = useState<BoardFilter>({
+    labelId: '',
+    overdueOnly: false,
+    text: '',
+  });
+  const [focusedColumnId, setFocusedColumnId] = useState<string | null>(null);
+  const searchRef = useRef<HTMLInputElement | null>(null);
   const initialBoard = useRef<BoardHydrate | null>(null);
   const moveCard = useMoveCardMutation({ onError: setMoveError });
   const moveColumn = useMoveColumnMutation({ onError: setMoveError });
   const updateCard = useUpdateCardMutation(setMoveError);
+  const createCard = useCreateCardMutation(setMoveError);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, {
@@ -81,6 +94,26 @@ export function BoardView() {
   const board = query.data?.board;
   const columns = query.data?.columns ?? [];
   const labels = query.data?.labels ?? [];
+  const filteredColumns = useMemo(() => {
+    const needle = filter.text.trim().toLocaleLowerCase();
+    const now = Date.now();
+    return columns.map((column) => ({
+      ...column,
+      cards: column.cards.filter((card) => {
+        const textMatch =
+          !needle ||
+          `${card.title} ${card.description}`
+            .toLocaleLowerCase()
+            .includes(needle);
+        const labelMatch =
+          !filter.labelId || card.labelIds.includes(filter.labelId);
+        const overdueMatch =
+          !filter.overdueOnly ||
+          (card.dueDate !== null && Date.parse(card.dueDate) < now);
+        return textMatch && labelMatch && overdueMatch;
+      }),
+    }));
+  }, [columns, filter]);
   const labelsById = new Map(labels.map((label) => [label.id, label]));
   const closeDrawer = useCallback(() => {
     setSelectedCard((current) => {
@@ -126,6 +159,22 @@ export function BoardView() {
     });
     setUndoState(null);
   };
+  const focusSearch = useCallback(() => searchRef.current?.focus(), []);
+  const addCard = useCallback(() => {
+    const columnId = focusedColumnId ?? columns[0]?.id;
+    if (!columnId) return;
+    const title = window.prompt('Card title');
+    if (title?.trim()) {
+      createCard.mutate({ columnId, title: title.trim(), placement: 'bottom' });
+    }
+  }, [columns, createCard, focusedColumnId]);
+  useKeyboardShortcuts({
+    onAdd: addCard,
+    onHelp: () => {
+      setShowShortcuts(true);
+    },
+    onSearch: focusSearch,
+  });
 
   if (!query.data || !board) return <BoardSkeleton />;
 
@@ -221,7 +270,7 @@ export function BoardView() {
       aria-labelledby="board-title"
       className="flex min-h-0 flex-1 flex-col"
     >
-      <div className="px-6 pb-4">
+      <div className="px-6 pb-2">
         <h1
           className="truncate text-2xl font-black tracking-tight text-slate-950 dark:text-white"
           id="board-title"
@@ -229,6 +278,12 @@ export function BoardView() {
           {board.name}
         </h1>
       </div>
+      <FilterBar
+        labels={labels}
+        onChange={setFilter}
+        value={filter}
+        searchRef={searchRef}
+      />
       {columns.length === 0 ? (
         <section className="mx-6 rounded-2xl border border-dashed border-slate-300 p-10 text-center text-slate-500 dark:border-slate-700 dark:text-slate-400">
           This board has no columns yet.
@@ -265,11 +320,12 @@ export function BoardView() {
               aria-label="Board columns"
               className="flex min-h-0 flex-1 gap-4 overflow-x-auto px-6 pb-6"
             >
-              {columns.map((column) => (
+              {filteredColumns.map((column) => (
                 <Column
                   column={column}
                   key={column.id}
                   labelsById={labelsById}
+                  onFocusColumn={setFocusedColumnId}
                   onOpenCard={openCard}
                 />
               ))}
@@ -313,6 +369,13 @@ export function BoardView() {
             setUndoState(null);
           }}
           onUndo={undoArchive}
+        />
+      )}
+      {showShortcuts && (
+        <ShortcutsOverlay
+          onClose={() => {
+            setShowShortcuts(false);
+          }}
         />
       )}
     </main>

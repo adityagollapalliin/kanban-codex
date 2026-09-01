@@ -10,14 +10,26 @@ import { createCardsRouter } from './routes/cards.js';
 import { createChecklistItemsRouter } from './routes/checklist-items.js';
 import { createColumnsRouter } from './routes/columns.js';
 import { createExportImportRouter } from './routes/export-import.js';
+import { createAuthRouter } from './routes/auth.js';
+import { requireAuth } from './services/auth.js';
 
 interface AppOptions {
   readonly database: Database.Database;
   readonly logger: Logger;
   readonly version: string;
+  readonly authPasswordHash?: string;
+  readonly sessionSecret?: string;
+  readonly production?: boolean;
 }
 
-export function createApp({ database, logger, version }: AppOptions): Express {
+export function createApp({
+  database,
+  logger,
+  version,
+  authPasswordHash,
+  sessionSecret,
+  production = false,
+}: AppOptions): Express {
   const app = express();
 
   app.disable('x-powered-by');
@@ -27,6 +39,14 @@ export function createApp({ database, logger, version }: AppOptions): Express {
   app.get('/healthz', (_request, response) => {
     response.json(healthResponseSchema.parse({ ok: true, version }));
   });
+
+  if (authPasswordHash && sessionSecret) {
+    app.use(
+      '/api/auth',
+      createAuthRouter(database, authPasswordHash, sessionSecret, production),
+    );
+    app.use('/api', requireAuth(database, sessionSecret, true));
+  }
 
   app.use('/api/board', createBoardRouter(database));
   app.use('/api/columns', createColumnsRouter(database));

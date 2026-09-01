@@ -1,5 +1,6 @@
 import {
   cardSchema,
+  type CreateCardRequest,
   type BoardHydrate,
   type UpdateCardRequest,
 } from '@kanban/shared';
@@ -28,6 +29,18 @@ export function useUpdateCardMutation(onError: (message: string) => void) {
     onError: (error, { rollbackBoard }) => {
       queryClient.setQueryData(boardQueryKey, rollbackBoard);
       onError(error instanceof Error ? error.message : 'Card update failed');
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: boardQueryKey }),
+  });
+}
+
+export function useCreateCardMutation(onError: (message: string) => void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateCardRequest) =>
+      sendJson('/api/cards', 'POST', input, cardSchema),
+    onError: (error) => {
+      onError(error instanceof Error ? error.message : 'Card creation failed');
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: boardQueryKey }),
   });
