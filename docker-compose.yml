@@ -1,0 +1,16 @@
+services:
+  kanban:
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_PATH: /app/data/kanban.sqlite
+      SESSION_SECRET: ${SESSION_SECRET:-change-this-session-secret-to-32-chars}
+      AUTH_PASSWORD_HASH: ${AUTH_PASSWORD_HASH:-}
+    volumes:
+      - kanban-data:/app/data
+
+volumes:
+  kanban-data:

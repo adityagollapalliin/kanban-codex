@@ -1,4 +1,5 @@
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 
 import { createApp } from './app.js';
 import { ConfigError, parseConfig } from './config.js';
@@ -27,7 +28,17 @@ try {
   }
   logger.info({ applied: migrations.applied }, 'database migrations completed');
   const version = process.env.npm_package_version ?? '0.1.0';
-  const app = createApp({ logger, version });
+  const app = createApp({
+    database,
+    logger,
+    version,
+    ...(config.authPasswordHash
+      ? { authPasswordHash: config.authPasswordHash }
+      : {}),
+    ...(config.sessionSecret ? { sessionSecret: config.sessionSecret } : {}),
+    production: config.nodeEnv === 'production',
+    staticRoot: fileURLToPath(new URL('../../../web/dist', import.meta.url)),
+  });
   const server = app.listen(config.port, () => {
     logger.info({ port: config.port, version }, 'server listening');
     if (!config.authPasswordHash) {

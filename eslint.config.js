@@ -13,6 +13,7 @@ export default tseslint.config(
     languageOptions: {
       parserOptions: {
         projectService: true,
+        allowDefaultProject: ['playwright.config.ts', 'e2e/*.ts'],
         tsconfigRootDir: import.meta.dirname,
       },
       globals: { ...globals.node, ...globals.browser },
@@ -27,6 +28,10 @@ export default tseslint.config(
   },
   {
     files: ['**/*.{js,mjs}'],
+    ...tseslint.configs.disableTypeChecked,
+  },
+  {
+    files: ['e2e/**/*.ts', 'playwright.config.ts'],
     ...tseslint.configs.disableTypeChecked,
   },
   prettier,

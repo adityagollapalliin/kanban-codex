@@ -5,7 +5,7 @@
 
 ## Purpose
 
-Provide the minimal Phase 1 application shell and prove the React application boots. It does not fetch or render board data.
+Provide the application frame, title treatment, and error-reset boundary around the read-only board. Query ownership remains in `BoardView`.
 
 ## Props
 
@@ -15,27 +15,27 @@ Provide the minimal Phase 1 application shell and prove the React application bo
 
 ## State ownership
 
-No local or server state is owned in this phase.
+No local state. The root QueryClient is provided by `main.tsx`; query error reset is composed here.
 
 ## Data dependencies
 
-None. TanStack Query is introduced with the board UI rather than configured without a consumer.
+Composes `BoardView`, whose `useBoardQuery` uses `['board']`.
 
 ## Interactions
 
-None.
+Retry in the error fallback resets both the React boundary and TanStack Query error state.
 
 ## Keyboard & accessibility
 
-The page uses a landmark and heading hierarchy. There are no interactive controls or custom focus behaviours.
+The page uses banner/main landmarks and heading hierarchy. Retry receives normal keyboard focus and a visible ring.
 
 ## Visual states
 
-Default is a compact readiness message. Hover, focus, loading, empty, error, disabled, dragging, and over-WIP-limit states are not applicable.
+Default shows the board shell. Loading and error are delegated; dragging is not applicable until Phase 6.
 
 ## Composition
 
-Rendered by `main.tsx`; it has no child components.
+Rendered by `main.tsx`; renders `BoardErrorBoundary` and `BoardView`.
 
 ## Edge cases
 
