@@ -202,6 +202,7 @@ export type Label = z.infer<typeof labelSchema>;
 export type ChecklistItem = z.infer<typeof checklistItemSchema>;
 export type Card = z.infer<typeof cardSchema>;
 export type Column = z.infer<typeof columnSchema>;
+export type HydratedColumn = z.infer<typeof hydratedColumnSchema>;
 export type BoardHydrate = z.infer<typeof boardHydrateSchema>;
 export type CreateColumnRequest = z.infer<typeof createColumnRequestSchema>;
 export type UpdateColumnRequest = z.infer<typeof updateColumnRequestSchema>;

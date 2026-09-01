@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "test": "vitest run",
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
     "@kanban/shared": "0.1.0",
+    "@tanstack/react-query": "^5.102.8",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   }
