@@ -1,51 +1,40 @@
-import { errorResponseSchema, healthResponseSchema } from '@kanban/shared';
-import express, { type ErrorRequestHandler, type Express } from 'express';
+import { healthResponseSchema } from '@kanban/shared';
+import type Database from 'better-sqlite3';
+import express, { type Express } from 'express';
 import type { Logger } from 'pino';
 
+import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
 import { requestContext } from './middleware/request-context.js';
+import { createBoardRouter } from './routes/board.js';
+import { createCardsRouter } from './routes/cards.js';
+import { createChecklistItemsRouter } from './routes/checklist-items.js';
+import { createColumnsRouter } from './routes/columns.js';
+import { createExportImportRouter } from './routes/export-import.js';
 
 interface AppOptions {
+  readonly database: Database.Database;
   readonly logger: Logger;
   readonly version: string;
 }
 
-export function createApp({ logger, version }: AppOptions): Express {
+export function createApp({ database, logger, version }: AppOptions): Express {
   const app = express();
 
   app.disable('x-powered-by');
   app.use(requestContext(logger));
-  app.use(express.json());
+  app.use(express.json({ limit: '10mb' }));
 
   app.get('/healthz', (_request, response) => {
     response.json(healthResponseSchema.parse({ ok: true, version }));
   });
 
-  app.use('/api', (_request, response) => {
-    response.status(404).json(
-      errorResponseSchema.parse({
-        error: { code: 'NOT_FOUND', message: 'API route not found' },
-      }),
-    );
-  });
-
-  const handleError: ErrorRequestHandler = (
-    error,
-    _request,
-    response,
-    _next,
-  ) => {
-    const requestId: unknown = response.locals.requestId;
-    logger.error({ error, requestId }, 'request failed');
-    response.status(500).json(
-      errorResponseSchema.parse({
-        error: {
-          code: 'INTERNAL_ERROR',
-          message: 'An unexpected error occurred',
-        },
-      }),
-    );
-  };
-  app.use(handleError);
+  app.use('/api/board', createBoardRouter(database));
+  app.use('/api/columns', createColumnsRouter(database));
+  app.use('/api/cards', createCardsRouter(database));
+  app.use('/api/checklist-items', createChecklistItemsRouter(database));
+  app.use('/api', createExportImportRouter(database));
+  app.use('/api', notFoundHandler);
+  app.use(errorHandler(logger));
 
   return app;
 }

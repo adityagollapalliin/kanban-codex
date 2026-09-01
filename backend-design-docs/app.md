@@ -5,15 +5,15 @@
 
 ## Purpose
 
-Construct the Express application and expose the unauthenticated health endpoint. Process startup and listening remain outside this module so tests can instantiate it directly.
+Construct Express, expose health, mount the complete API, and install JSON error handling. Process startup remains outside so tests instantiate it directly.
 
 ## Public interface
 
-`createApp(options: { logger: Logger; version: string }): Express`
+`createApp(options: { database: Database.Database; logger: Logger; version: string }): Express`
 
 ## Data access
 
-None.
+Delegates database access to injected route services.
 
 ## Transaction boundaries
 

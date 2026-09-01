@@ -5,8 +5,11 @@ import pino from 'pino';
 import request from 'supertest';
 
 import { createApp } from '../src/app.js';
+import { openDatabase } from '../src/db/client.js';
 
+const database = openDatabase(':memory:');
 const app = createApp({
+  database,
   logger: pino({ level: 'silent' }),
   version: 'test-version',
 });
